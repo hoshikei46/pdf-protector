@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF パスワード保護</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --accent: #6ee7b7;
+    --text: #e8e8f0;
+    --text-dim: #8888a0;
+    --danger: #f87171;
+    --success: #6ee7b7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(110,231,183,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,231,183,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 0 60px rgba(110,231,183,.06);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .icon-wrap {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #065f46, #064e3b);
+    border: 1px solid #059669;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .icon-wrap svg { width: 22px; height: 22px; color: var(--accent); }
+
+  h1 { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+  .subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; font-weight: 300; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(110,231,183,.08);
+    border: 1px solid rgba(110,231,183,.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 10px; font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    margin-top: 6px;
+  }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--surface2);
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(110,231,183,.04);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .drop-icon { width: 40px; height: 40px; margin: 0 auto 12px; color: var(--text-dim); }
+  .drop-text { font-size: 14px; color: var(--text-dim); font-weight: 300; }
+  .drop-text strong { color: var(--accent); font-weight: 500; }
+  .drop-hint { font-size: 11px; color: #555568; margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+  .file-info {
+    display: none; align-items: center; gap: 12px;
+    background: rgba(110,231,183,.06);
+    border: 1px solid rgba(110,231,183,.2);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
+  }
+  .file-info.visible { display: flex; }
+  .file-info svg { color: var(--accent); flex-shrink: 0; }
+  .file-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .file-size { font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  .remove-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 2px; display: flex; align-items: center; transition: color .2s; }
+  .remove-btn:hover { color: var(--danger); }
+
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .8px; }
+
+  .input-wrap { position: relative; display: flex; align-items: center; }
+
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 42px 11px 14px;
+    font-size: 14px; color: var(--text);
+    font-family: 'DM Mono', monospace;
+    outline: none; transition: border-color .2s;
+  }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,231,183,.08); }
+  input::placeholder { color: #444458; }
+
+  .toggle-pw {
+    position: absolute; right: 12px; background: none; border: none;
+    color: var(--text-dim); cursor: pointer; padding: 2px;
+    display: flex; align-items: center; transition: color .15s;
+  }
+  .toggle-pw:hover { color: var(--accent); }
+
+  .strength-wrap { margin-top: 8px; display: flex; gap: 4px; align-items: center; }
+  .strength-bar { height: 3px; flex: 1; border-radius: 2px; background: var(--border); transition: background .3s; }
+  .strength-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-dim); min-width: 40px; text-align: right; }
+
+  .match-hint { font-size: 11px; margin-top: 6px; font-family: 'DM Mono', monospace; color: transparent; min-height: 16px; }
+  .match-hint.ok { color: var(--success); }
+  .match-hint.ng { color: var(--danger); }
+
+  .btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #059669, #047857);
+    border: none; border-radius: 10px; color: #fff;
+    font-size: 14px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif;
+    letter-spacing: .3px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 8px;
+  }
+  .btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #10b981, #059669);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(16,185,129,.25);
+  }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  .progress-wrap { display: none; align-items: center; gap: 10px; margin-top: 12px; }
+  .progress-wrap.visible { display: flex; }
+  .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-text { font-size: 12px; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 20px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 100; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(110,231,183,.3); color: var(--success); }
+  .toast.error { border-color: rgba(248,113,113,.3); color: var(--danger); }
+
+  .note { font-size: 11px; color: #444458; text-align: center; margin-top: 20px; line-height: 1.6; font-weight: 300; }
+  .spec-list { margin-top: 16px; background: var(--surface2); border-radius: 8px; padding: 12px 16px; }
+  .spec-item { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; }
+  .spec-item .key { color: var(--text-dim); }
+  .spec-item .val { color: var(--accent); font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <div>
+      <h1>PDF パスワード保護</h1>
+      <div class="subtitle">ローカル処理・サーバー送信なし</div>
+      <div class="badge">🔐 AES-256 暗号化</div>
+    </div>
+  </div>
+
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".pdf">
+    <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="12" y1="18" x2="12" y2="12"/>
+      <line x1="9" y1="15" x2="15" y2="15"/>
+    </svg>
+    <div class="drop-text"><strong>クリック</strong>またはドラッグ＆ドロップ</div>
+    <div class="drop-hint">PDF ファイルのみ対応（最大50MB）</div>
+  </div>
+
+  <div class="file-info" id="fileInfo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+    </svg>
+    <span class="file-name" id="fileName"></span>
+    <span class="file-size" id="fileSize"></span>
+    <button class="remove-btn" id="removeBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="field">
+    <label>パスワード</label>
+    <div class="input-wrap">
+      <input type="password" id="pw1" placeholder="パスワードを入力" autocomplete="new-password">
+      <button class="toggle-pw" type="button" onclick="togglePw('pw1',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="strength-wrap">
+      <div class="strength-bar" id="s1"></div>
+      <div class="strength-bar" id="s2"></div>
+      <div class="strength-bar" id="s3"></div>
+      <div class="strength-bar" id="s4"></div>
+      <div class="strength-label" id="strengthLabel"></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>パスワード（確認）</label>
+    <div class="input-wrap">
+      <input type="password" id="pw2" placeholder="もう一度入力" autocomplete="new-password">
+      <button class="toggle-pw" type="button" onclick="togglePw('pw2',this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="match-hint" id="matchHint"></div>
+  </div>
+
+  <button class="btn" id="encryptBtn" disabled onclick="encrypt()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    パスワードを設定してダウンロード
+  </button>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="spinner"></div>
+    <div class="progress-text">暗号化処理中...</div>
+  </div>
+
+  <div class="spec-list">
+    <div class="spec-item"><span class="key">暗号化方式</span><span class="val">AES-256 (PDF R6)</span></div>
+    <div class="spec-item"><span class="key">印刷</span><span class="val">高解像度 許可</span></div>
+    <div class="spec-item"><span class="key">内容変更・コピー</span><span class="val">禁止</span></div>
+    <div class="spec-item"><span class="key">フォーム入力</span><span class="val">許可</span></div>
+  </div>
+
+  <div class="note">
+    ファイルはこのPCのローカルサーバーで処理されます。<br>
+    外部のサーバーには送信されません。
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedFile = null;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.name.toLowerCase().endsWith('.pdf')) setFile(f);
+  else showToast('PDFファイルを選択してください', 'error');
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
+document.getElementById('removeBtn').addEventListener('click', clearFile);
+
+function setFile(f) {
+  selectedFile = f;
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSize').textContent = formatSize(f.size);
+  document.getElementById('fileInfo').classList.add('visible');
+  dropZone.style.display = 'none';
+  validate();
+}
+
+function clearFile() {
+  selectedFile = null; fileInput.value = '';
+  document.getElementById('fileInfo').classList.remove('visible');
+  dropZone.style.display = ''; validate();
+}
+
+function formatSize(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+
+const pw1 = document.getElementById('pw1');
+const pw2 = document.getElementById('pw2');
+pw1.addEventListener('input', () => { updateStrength(); validate(); });
+pw2.addEventListener('input', () => { updateMatch(); validate(); });
+
+function updateStrength() {
+  const v = pw1.value;
+  const bars = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
+  const label = document.getElementById('strengthLabel');
+  let score = 0;
+  if (v.length >= 6) score++;
+  if (v.length >= 10) score++;
+  if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+  if (/[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v)) score++;
+  const colors = ['#f87171','#fb923c','#fbbf24','#6ee7b7'];
+  const labels = ['弱い','普通','強い','最強'];
+  bars.forEach((b, i) => b.style.background = i < score ? colors[score-1] : 'var(--border)');
+  label.textContent = v.length ? (labels[score-1] || labels[0]) : '';
+  label.style.color = v.length ? (colors[score-1] || colors[0]) : '';
+}
+
+function updateMatch() {
+  const h = document.getElementById('matchHint');
+  if (!pw2.value) { h.textContent = ''; h.className = 'match-hint'; return; }
+  if (pw1.value === pw2.value) { h.textContent = '✓ 一致しています'; h.className = 'match-hint ok'; }
+  else { h.textContent = '✗ 一致しません'; h.className = 'match-hint ng'; }
+}
+
+function validate() {
+  const ok = selectedFile && pw1.value.length >= 1 && pw1.value === pw2.value;
+  document.getElementById('encryptBtn').disabled = !ok;
+}
+
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  const isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  btn.innerHTML = isText
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+}
+
+async function encrypt() {
+  if (!selectedFile || !pw1.value) return;
+  const btn = document.getElementById('encryptBtn');
+  const prog = document.getElementById('progressWrap');
+  btn.disabled = true;
+  prog.classList.add('visible');
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('password', pw1.value);
+
+    const res = await fetch('/encrypt', { method: 'POST', body: formData });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'サーバーエラー');
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const base = selectedFile.name.replace(/\.pdf$/i, '');
+    a.href = url; a.download = `${base}_protected.pdf`; a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ パスワード付きPDFを保存しました', 'success');
+  } catch (e) {
+    showToast('エラー: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    prog.classList.remove('visible');
+    validate();
+  }
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
