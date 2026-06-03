@@ -8,15 +8,16 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #0f0f11;
-    --surface: #18181c;
-    --surface2: #222228;
-    --border: #2e2e38;
-    --accent: #6ee7b7;
-    --text: #e8e8f0;
-    --text-dim: #8888a0;
-    --danger: #f87171;
-    --success: #6ee7b7;
+    --bg: #f0faf4;
+    --surface: #ffffff;
+    --surface2: #f0faf4;
+    --border: #b7e4c7;
+    --accent: #1a7f37;
+    --accent2: #2da44e;
+    --text: #1c2b20;
+    --text-dim: #5a7a62;
+    --danger: #cf222e;
+    --success: #1a7f37;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,8 +38,8 @@
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(110,231,183,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(110,231,183,.03) 1px, transparent 1px);
+      linear-gradient(rgba(26,127,55,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,127,55,.04) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
   }
@@ -50,7 +51,7 @@
     padding: 40px;
     width: 100%;
     max-width: 520px;
-    box-shadow: 0 0 60px rgba(110,231,183,.06);
+    box-shadow: 0 4px 24px rgba(26,127,55,.08);
   }
 
   .header {
@@ -62,8 +63,8 @@
 
   .icon-wrap {
     width: 44px; height: 44px;
-    background: linear-gradient(135deg, #065f46, #064e3b);
-    border: 1px solid #059669;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border: 1px solid #6ee7b7;
     border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
@@ -71,13 +72,13 @@
 
   .icon-wrap svg { width: 22px; height: 22px; color: var(--accent); }
 
-  h1 { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+  h1 { font-size: 18px; font-weight: 700; letter-spacing: -.3px; color: var(--text); }
   .subtitle { font-size: 12px; color: var(--text-dim); margin-top: 2px; font-weight: 300; }
 
   .badge {
     display: inline-flex; align-items: center; gap: 4px;
-    background: rgba(110,231,183,.08);
-    border: 1px solid rgba(110,231,183,.2);
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
     border-radius: 20px;
     padding: 3px 10px;
     font-size: 10px; font-family: 'DM Mono', monospace;
@@ -85,7 +86,6 @@
     margin-top: 6px;
   }
 
-  /* Drop zone */
   .drop-zone {
     border: 1.5px dashed var(--border);
     border-radius: 12px;
@@ -100,7 +100,7 @@
 
   .drop-zone:hover, .drop-zone.drag-over {
     border-color: var(--accent);
-    background: rgba(110,231,183,.04);
+    background: #d1fae5;
   }
 
   .drop-zone input[type="file"] {
@@ -110,17 +110,17 @@
   .drop-icon { width: 40px; height: 40px; margin: 0 auto 12px; color: var(--text-dim); }
   .drop-text { font-size: 14px; color: var(--text-dim); font-weight: 300; }
   .drop-text strong { color: var(--accent); font-weight: 500; }
-  .drop-hint { font-size: 11px; color: #555568; margin-top: 6px; font-family: 'DM Mono', monospace; }
+  .drop-hint { font-size: 11px; color: #7a9e82; margin-top: 6px; font-family: 'DM Mono', monospace; }
 
   .file-info {
     display: none; align-items: center; gap: 12px;
-    background: rgba(110,231,183,.06);
-    border: 1px solid rgba(110,231,183,.2);
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
     border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
   }
   .file-info.visible { display: flex; }
   .file-info svg { color: var(--accent); flex-shrink: 0; }
-  .file-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .file-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; color: var(--text); }
   .file-size { font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .remove-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 2px; display: flex; align-items: center; transition: color .2s; }
   .remove-btn:hover { color: var(--danger); }
@@ -140,8 +140,8 @@
     font-family: 'DM Mono', monospace;
     outline: none; transition: border-color .2s;
   }
-  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,231,183,.08); }
-  input::placeholder { color: #444458; }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,127,55,.1); }
+  input::placeholder { color: #a8c4af; }
 
   .toggle-pw {
     position: absolute; right: 12px; background: none; border: none;
@@ -160,7 +160,7 @@
 
   .btn {
     width: 100%; padding: 13px;
-    background: linear-gradient(135deg, #059669, #047857);
+    background: linear-gradient(135deg, #1a7f37, #116329);
     border: none; border-radius: 10px; color: #fff;
     font-size: 14px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif;
     letter-spacing: .3px; cursor: pointer; transition: all .2s;
@@ -168,9 +168,9 @@
     margin-top: 8px;
   }
   .btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #2da44e, #1a7f37);
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(16,185,129,.25);
+    box-shadow: 0 8px 24px rgba(26,127,55,.25);
   }
   .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
@@ -183,22 +183,22 @@
   .toast {
     position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(80px);
-    background: var(--surface2); border: 1px solid var(--border);
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: 10px; padding: 12px 20px; font-size: 13px;
     display: flex; align-items: center; gap: 10px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    box-shadow: 0 8px 32px rgba(26,127,55,.15);
     transition: transform .3s cubic-bezier(.34,1.56,.64,1);
     z-index: 100; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: rgba(110,231,183,.3); color: var(--success); }
-  .toast.error { border-color: rgba(248,113,113,.3); color: var(--danger); }
+  .toast.success { border-color: #6ee7b7; color: var(--success); }
+  .toast.error { border-color: #fca5a5; color: var(--danger); }
 
-  .note { font-size: 11px; color: #444458; text-align: center; margin-top: 20px; line-height: 1.6; font-weight: 300; }
-  .spec-list { margin-top: 16px; background: var(--surface2); border-radius: 8px; padding: 12px 16px; }
+  .note { font-size: 11px; color: var(--text-dim); text-align: center; margin-top: 20px; line-height: 1.6; font-weight: 300; }
+  .spec-list { margin-top: 16px; background: var(--surface2); border-radius: 8px; padding: 12px 16px; border: 1px solid var(--border); }
   .spec-item { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; }
   .spec-item .key { color: var(--text-dim); }
-  .spec-item .val { color: var(--accent); font-family: 'DM Mono', monospace; }
+  .spec-item .val { color: var(--accent); font-family: 'DM Mono', monospace; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -213,7 +213,7 @@
     </div>
     <div>
       <h1>PDF パスワード保護</h1>
-      <div class="subtitle">ローカル処理・サーバー送信なし</div>
+      <div class="subtitle">ファイルは、Vercelサーバーで処理後、すぐに削除されます。</div>
       <div class="badge">🔐 AES-256 暗号化</div>
     </div>
   </div>
@@ -227,7 +227,7 @@
       <line x1="9" y1="15" x2="15" y2="15"/>
     </svg>
     <div class="drop-text"><strong>クリック</strong>またはドラッグ＆ドロップ</div>
-    <div class="drop-hint">PDF ファイルのみ対応（最大50MB）</div>
+    <div class="drop-hint">PDF ファイルのみ対応（最大4.5MB）</div>
   </div>
 
   <div class="file-info" id="fileInfo">
@@ -280,16 +280,8 @@
     <div class="progress-text">暗号化処理中...</div>
   </div>
 
-  <div class="spec-list">
-    <div class="spec-item"><span class="key">暗号化方式</span><span class="val">AES-256 (PDF R6)</span></div>
-    <div class="spec-item"><span class="key">印刷</span><span class="val">高解像度 許可</span></div>
-    <div class="spec-item"><span class="key">内容変更・コピー</span><span class="val">禁止</span></div>
-    <div class="spec-item"><span class="key">フォーム入力</span><span class="val">許可</span></div>
-  </div>
-
   <div class="note">
-    ファイルはこのPCのローカルサーバーで処理されます。<br>
-    外部のサーバーには送信されません。
+    開くときにパスワードが必要になります。
   </div>
 </div>
 
@@ -346,7 +338,7 @@ function updateStrength() {
   if (v.length >= 10) score++;
   if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
   if (/[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v)) score++;
-  const colors = ['#f87171','#fb923c','#fbbf24','#6ee7b7'];
+  const colors = ['#ef4444','#f97316','#eab308','#1a7f37'];
   const labels = ['弱い','普通','強い','最強'];
   bars.forEach((b, i) => b.style.background = i < score ? colors[score-1] : 'var(--border)');
   label.textContent = v.length ? (labels[score-1] || labels[0]) : '';
